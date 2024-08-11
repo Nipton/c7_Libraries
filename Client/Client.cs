@@ -9,17 +9,19 @@ using System.Threading.Tasks;
 
 namespace Client
 {
-    internal class Client
+    internal class Client<T>
     {
-        readonly IPEndPoint remotePoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 5000);
-        readonly IMessageSource messageSource;
+        //readonly IPEndPoint remotePoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 5000);
+        readonly IMessageSource<T> messageSource;
         string name;
+        T t;
         User fromUser;
-        public Client(string name, IMessageSource messageSource)
+        public Client(string name, IMessageSource<T> messageSource, T t)
         {
             this.messageSource = messageSource;
             this.name = name;
             fromUser = new User(name);
+            this.t = t;
         }
         public async Task ClientReceveAsync()
         {
@@ -72,7 +74,7 @@ namespace Client
         {
             try
             {
-                await messageSource.SendAsync(message, remotePoint);
+                await messageSource.SendAsync(message, t);
             }
             catch (Exception ex)
             {

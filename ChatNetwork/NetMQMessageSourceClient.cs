@@ -11,26 +11,27 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ChatNetwork
 {
-    public class NetMQMessageSourceClient : IMessageSource
+    public class NetMQMessageSourceClient : IMessageSource<NetMQFrame>
     {
-        RequestSocket socket;
+        DealerSocket socket;
        
          public NetMQMessageSourceClient(int port)
         {
-            socket = new RequestSocket();
+            socket = new DealerSocket();
             socket.Connect($"tcp://127.0.0.1:{port}");
         }
 
-        public async Task<(Message?, IPEndPoint)> ReceiveAsync()
+        public async Task<(Message?, NetMQFrame)> ReceiveAsync()
         {
+            NetMQFrame netMQ = null;
             var data = socket.ReceiveFrameString();
             Message? message = Message.FromJson(data);
-            IPEndPoint iPEndPoint = null;
-            var tuple = (message, iPEndPoint);
+            //IPEndPoint iPEndPoint = null;
+            var tuple = (message, netMQ);
             return tuple;
         }
 
-        public async Task SendAsync(Message message, IPEndPoint remoteEndPoint)
+        public async Task SendAsync(Message message, NetMQFrame remoteEndPoint)
         {
             var data = message.ToJson();
             socket.SendFrame(data);

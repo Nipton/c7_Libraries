@@ -1,5 +1,7 @@
 ﻿using ChatDb;
 using ChatNetwork;
+using NetMQ;
+using System.Net;
 
 namespace Server
 {
@@ -7,8 +9,8 @@ namespace Server
     {
         static void Main(string[] args)
         {
-            IMessageSource messageSource = new NetMQMessageSourceServer(5000);
-            Server server = new Server(messageSource);
+            IMessageSource<NetMQFrame> messageSource = new NetMQMessageSourceServer(5000);
+            Server<NetMQFrame> server = new Server<NetMQFrame>(messageSource);
             server.Start();
             Console.ReadLine();
             server.Stop();

@@ -3,10 +3,9 @@ using System.Net;
 
 namespace ChatNetwork
 {
-    public interface IMessageSource
+    public interface IMessageSource<T>
     {
-        Task SendAsync(Message message, IPEndPoint remoteEndPoint);
-        Task<(Message?, IPEndPoint)> ReceiveAsync();
-
+        Task SendAsync(Message message, T remoteEndPoint);
+        Task<(Message?, T)> ReceiveAsync();
     }
 }

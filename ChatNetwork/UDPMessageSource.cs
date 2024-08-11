@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ChatNetwork
 {
-    public class UDPMessageSource : IMessageSource
+    public class UDPMessageSource : IMessageSource<IPEndPoint>
     {
         readonly UdpClient udpClient;
         public UDPMessageSource(int port)

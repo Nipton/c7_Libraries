@@ -11,28 +11,30 @@ using System.Threading.Tasks;
 
 namespace ChatNetwork
 {
-    public class NetMQMessageSourceServer : IMessageSource
+    public class NetMQMessageSourceServer : IMessageSource<NetMQFrame>
     {
-        ResponseSocket socket;
+        RouterSocket socket;
         public NetMQMessageSourceServer(int port)
         {
-            socket = new ResponseSocket();
+            socket = new RouterSocket();
             socket.Bind($"tcp://127.0.0.1:{port}");
         }
-        public async Task<(Message?, IPEndPoint)> ReceiveAsync()
+        public async Task<(Message?, NetMQFrame)> ReceiveAsync()
         {
-            var data = socket.ReceiveFrameString();
-            Message? message = Message.FromJson(data);
-            IPEndPoint iPEndPoint = null;
-            var tuple = (message, iPEndPoint);
+            var data = socket.ReceiveMultipartMessage();
+            NetMQFrame clientId = data.First;
+            Message? message = Message.FromJson(data.Last.ConvertToString());
+            var tuple = (message, clientId);
             return tuple;
         }
 
-        public async Task SendAsync(Message message, IPEndPoint remoteEndPoint)
+        public async Task SendAsync(Message message, NetMQFrame remoteEndPoint)
         {
-            socket.Connect(remoteEndPoint.ToString());
             var data = message.ToJson();
-            socket.SendFrame(data);
+            var responseMessage = new NetMQMessage();
+            responseMessage.Append(remoteEndPoint);
+            responseMessage.Append(data);
+            socket.TrySendMultipartMessage(responseMessage);
         }
     }
 }

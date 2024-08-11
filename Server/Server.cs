@@ -11,16 +11,16 @@ using System.Threading.Tasks;
 
 namespace Server
 {
-    internal class Server
+    internal class Server<T>
     {
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();        
-        IMessageSource messageSource;
+        IMessageSource<T> messageSource;
         IRepository repository;
-        Dictionary<string, IPEndPoint> clients;
-        public Server(IMessageSource messageSource)
+        Dictionary<string, T> clients;
+        public Server(IMessageSource<T> messageSource)
         {
             this.messageSource = messageSource;
-            clients = new Dictionary<string, IPEndPoint>();
+            clients = new Dictionary<string, T>();
             repository = new Repository();
         }
         public Task Start()
@@ -46,7 +46,7 @@ namespace Server
                 Console.WriteLine(ex.ToString());
             }
         }
-        protected async Task HandleMessageAsync(Message message, IPEndPoint remoteEndPoint)
+        protected async Task HandleMessageAsync(Message message, T remoteEndPoint)
         {
             Console.WriteLine(message);
             if (message.Command == Command.Login)
@@ -55,7 +55,7 @@ namespace Server
             }
             else if (message.Command == Command.Message)
             {
-                IPEndPoint newiPEndPoint;
+                T newiPEndPoint;
                 bool reuslt =  await repository.SendMessageAsync(message); // можно потом добавить ответ сервера, если пользователь не найден.
                 if (reuslt && clients.TryGetValue(message.RecipientName!, out newiPEndPoint!))
                 {
@@ -67,7 +67,7 @@ namespace Server
                 await repository.ConfirmMessageReceiptAsync(message);
             }
         }
-        protected async Task LoginAsync(string senderName, IPEndPoint iPEndPoint)
+        protected async Task LoginAsync(string senderName, T iPEndPoint)
         {
             User user = new User(senderName);
             clients[user.Name] = iPEndPoint;
